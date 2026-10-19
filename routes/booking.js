@@ -7,13 +7,13 @@ const {
   checkOut,
   checkOutStatus,
 } = require("../controllers/booking");
-const { authCheck } = require("../middlewares/auth");
+const { authCheck, requireProfile } = require("../middlewares/auth");
 
 // @ENDPOINT http://localhost:5000/api/bookings
 router.get("/bookings", authCheck, listBookings);
 
 // @ENDPOINT http://localhost:5000/api/booking
-router.post("/booking", authCheck, createBooking);
+router.post("/booking", authCheck, requireProfile, createBooking);
 
 // @Patment
 // @ENDPOINT http://localhost:5000/api/checkout
