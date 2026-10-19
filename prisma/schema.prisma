@@ -7,17 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  HOST
+  ADMIN
+}
+
+enum HostApplicationStatus {
+  NONE
+  PENDING
+  REJECTED
+}
+
 model Profile {
-  id        Int        @id @default(autoincrement())
-  clerkId   String     @unique
-  firstname String
-  lastname  String
-  email     String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  landmarks Landmark[]
-  bookings  Booking[]
-  favorites Favorite[]
+  id                    Int                   @id @default(autoincrement())
+  clerkId               String                @unique
+  firstname             String
+  lastname              String
+  email                 String
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  role                  UserRole              @default(USER)
+  hostApplicationStatus HostApplicationStatus @default(NONE)
+  landmarks             Landmark[]
+  bookings              Booking[]
+  favorites             Favorite[]
 }
 
 model Landmark {

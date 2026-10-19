@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `profile` ADD COLUMN `hostApplicationStatus` ENUM('NONE', 'PENDING', 'REJECTED') NOT NULL DEFAULT 'NONE',
+    ADD COLUMN `role` ENUM('USER', 'HOST', 'ADMIN') NOT NULL DEFAULT 'USER';
