@@ -6,6 +6,8 @@ const {
   listReservations,
   listAllReservations,
   listMyCampings,
+  listHostApplications,
+  decideHostApplication,
 } = require("../controllers/admin");
 const {
   authCheck,
@@ -43,4 +45,19 @@ router.get(
   listMyCampings,
 );
 
+router.get(
+  "/host-applications",
+  authCheck,
+  requireProfile,
+  requireRole("ADMIN"),
+  listHostApplications,
+);
+
+router.patch(
+  "/host-application/:profileId",
+  authCheck,
+  requireProfile,
+  requireRole("ADMIN"),
+  decideHostApplication,
+);
 module.exports = router;

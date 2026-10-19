@@ -55,3 +55,55 @@ exports.readProfile = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.applyHost = async (req, res, next) => {
+  try {
+    const { role, hostApplicationStatus } = req.profile;
+
+    if (role === "HOST") {
+      return res.status(409).json({
+        code: "ALREADY_HOST",
+        message: "This account is already a host",
+      });
+    }
+
+    if (hostApplicationStatus === "PENDING") {
+      return res.status(409).json({
+        code: "APPLICATION_PENDING",
+        message: "A host application is already pending",
+      });
+    }
+
+    const update = await prisma.profile.updateMany({
+      where: {
+        clerkId: req.user.id,
+        role: "USER",
+        hostApplicationStatus,
+      },
+      data: {
+        hostApplicationStatus: "PENDING",
+      },
+    });
+
+    if (update.count === 0) {
+      return res.status(409).json({
+        code: "APPLICATION_STATUS_CHANGED",
+        message: "The host application state has changed",
+      });
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { clerkId: req.user.id },
+      select: {
+        role: true,
+        hostApplicationStatus: true,
+      },
+    });
+    res.status(202).json({
+      result: profile,
+      message: "Host Application Submitted",
+    });
+  } catch (err) {
+    next(err);
+  }
+};

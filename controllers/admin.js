@@ -102,3 +102,110 @@ exports.listMyCampings = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.listHostApplications = async (req, res, next) => {
+  try {
+    const applications = await prisma.profile.findMany({
+      where: {
+        role: "USER",
+        hostApplicationStatus: "PENDING",
+      },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    res.json({ result: applications });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.decideHostApplication = async (req, res, next) => {
+  try {
+    const profileId = Number(req.params.profileId);
+    const { decision } = req.body;
+
+    if (!Number.isSafeInteger(profileId) || profileId <= 0) {
+      return res.status(400).json({
+        code: "INVALID_PROFILE_ID",
+        message: "Invalid profile id",
+      });
+    }
+
+    if (decision !== "approve" && decision !== "reject") {
+      return res.status(400).json({
+        code: "INVALID_DECISION",
+        message: "Decision must be approve or reject",
+      });
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profileId,
+      },
+      select: {
+        id: true,
+        role: true,
+        hostApplicationStatus: true,
+      },
+    });
+
+    if (!profile) {
+      return res.status(404).json({
+        code: "PROFILE_NOT_FOUND",
+        message: "Profile not found",
+      });
+    }
+
+    const update = await prisma.profile.updateMany({
+      where: {
+        id: profileId,
+        role: "USER",
+        hostApplicationStatus: "PENDING",
+      },
+      data:
+        decision === "approve"
+          ? {
+              role: "HOST",
+              hostApplicationStatus: "NONE",
+            }
+          : {
+              hostApplicationStatus: "REJECTED",
+            },
+    });
+
+    if (update.count === 0) {
+      return res.status(409).json({
+        code: "APPLICATION_NOT_PENDING",
+        message: "This application is no longer pending",
+      });
+    }
+
+    const result = await prisma.profile.findUnique({
+      where: { id: profileId },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        role: true,
+        hostApplicationStatus: true,
+      },
+    });
+    res.json({
+      result: result,
+      message:
+        decision === "approve"
+          ? "Host application approved"
+          : "Host application rejected",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
