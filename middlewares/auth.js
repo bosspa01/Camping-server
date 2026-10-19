@@ -35,3 +35,14 @@ exports.requireProfile = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.requireRole = (...allowedRoles) => (req, res, next) => {
+  if (!req.profile || !allowedRoles.includes(req.profile.role)) {
+    return res.status(403).json({
+      code: "FORBIDDEN",
+      message: "You do not have permission to perform this action",
+    })
+  }
+
+  next();
+};

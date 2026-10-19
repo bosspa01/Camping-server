@@ -7,12 +7,40 @@ const {
   listAllReservations,
   listMyCampings,
 } = require("../controllers/admin");
-const { authCheck } = require("../middlewares/auth");
+const {
+  authCheck,
+  requireProfile,
+  requireRole,
+} = require("../middlewares/auth");
 
 // @ENDPOINT http://localhost:5000/api/stats
-router.get("/stats", authCheck, listStats);
-router.get("/reservations", authCheck, listReservations);
-router.get("/all-reservations", authCheck, listAllReservations);
-router.get("/my-campings", authCheck, listMyCampings);
+router.get(
+  "/stats",
+  authCheck,
+  requireProfile,
+  requireRole("ADMIN"),
+  listStats,
+);
+router.get(
+  "/reservations",
+  authCheck,
+  requireProfile,
+  requireRole("HOST"),
+  listReservations,
+);
+router.get(
+  "/all-reservations",
+  authCheck,
+  requireProfile,
+  requireRole("HOST"),
+  listAllReservations,
+);
+router.get(
+  "/my-campings",
+  authCheck,
+  requireProfile,
+  requireRole("HOST"),
+  listMyCampings,
+);
 
 module.exports = router;

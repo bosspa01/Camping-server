@@ -10,15 +10,15 @@ const {
 const { authCheck, requireProfile } = require("../middlewares/auth");
 
 // @ENDPOINT http://localhost:5000/api/bookings
-router.get("/bookings", authCheck, listBookings);
+router.get("/bookings", authCheck, requireProfile, listBookings);
 
 // @ENDPOINT http://localhost:5000/api/booking
 router.post("/booking", authCheck, requireProfile, createBooking);
 
 // @Patment
 // @ENDPOINT http://localhost:5000/api/checkout
-router.post("/checkout", authCheck, checkOut);
+router.post("/checkout", authCheck, requireProfile, checkOut);
 
-router.get("/checkout-status/:session_id", authCheck, checkOutStatus);
+router.get("/checkout-status/:session_id", authCheck, requireProfile, checkOutStatus);
 
 module.exports = router;
